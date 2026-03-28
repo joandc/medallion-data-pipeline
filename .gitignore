@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+data/bronze/**/*.json
+data/silver/*.csv
+data/gold/*.csv
