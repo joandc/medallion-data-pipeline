@@ -29,7 +29,7 @@ AIR_QUALITY_DIR.mkdir(parents=True, exist_ok=True)
 # Create a timestamp for filenames using one timestamp for each run
 timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-# Call the weather API
+# Call the weather API and save immediately for each city
 for city in CITIES:
     weather_params = {
         "latitude": city["latitude"],
@@ -39,21 +39,18 @@ for city in CITIES:
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
         "timezone": "auto",
     }
-
     weather_response = requests.get(WEATHER_URL, params=weather_params, timeout=30)
     weather_response.raise_for_status()
     weather_data = weather_response.json()
 
-# Save the raw weather JSON (exactly as returned)
-for city in CITIES:
+    # Save the raw weather JSON (exactly as returned) before moving to the next city
     weather_file = WEATHER_DIR / f"{city['slug']}_weather_{timestamp}.json"
-
     with open(weather_file, "w", encoding="utf-8") as f:
         json.dump(weather_data, f, indent=2)
-
+    # Print progress messages
     print(f"Saved weather Bronze snapshot for {city['name']}")
 
-# Call the air-quality API
+# Call the air-quality API and save immediately for each city
 for city in CITIES:
     air_quality_params = {
         "latitude": city["latitude"],
@@ -70,14 +67,9 @@ for city in CITIES:
     air_quality_response.raise_for_status()
     air_quality_data = air_quality_response.json()
 
-# Save the raw air-quality JSON without changing the structure
-for city in CITIES:
+    # Save the raw air-quality JSON without changing the structure
     air_quality_file = AIR_QUALITY_DIR / f"{city['slug']}_air_quality_{timestamp}.json"
     with open(air_quality_file, "w", encoding="utf-8") as f:
         json.dump(air_quality_data, f, indent=2)
-
+    # Print progress messages
     print(f"Saved air-quality Bronze snapshot for {city['name']}")
-
-# Print progress messages
-print(f"Saved weather Bronze snapshot for {city['name']}")
-print(f"Saved air-quality Bronze snapshot for {city['name']}")
